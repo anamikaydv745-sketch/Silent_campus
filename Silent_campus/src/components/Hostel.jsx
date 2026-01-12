@@ -12,32 +12,42 @@ function HostelComplaintForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // 1. Validate locally to prevent "400 Bad Request" (Backend requires these)
+    if (!category || !hostel || !description) {
+      alert("Please fill in all required fields (Category, Hostel, and Description)");
+      return;
+    }
+
+    const data = {
+      category,
+      hostel,
+      room,
+      date,
+      description,
+      additional,
+    };
+
     try {
-      const formData = new FormData();
-      formData.append("category", category);
-      formData.append("hostel", hostel);
-      formData.append("room", room);
-      formData.append("date", date);
-      formData.append("description", description);
-      formData.append("additional", additional);
-      if (photo) formData.append("photo", photo);
-
-    //   const res = await fetch("http://localhost:5000/api/complaints", {
-    //     method: "POST",
-    //     body: formData, // FormData automatically sets correct headers
-    //   });
-
-    fetch("http://localhost:5000/api/complaints", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify(data),
-});
-
+      // 2. Use HTTP instead of HTTPS for local development to avoid SSL Alert 80
+      const res = await fetch("http://localhost:5000/api/complaints", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
 
       const result = await res.json();
-      alert(`Complaint Submitted! ID: ${result.complaintId}`);
 
-      // Reset form
+      if (!res.ok) {
+        // Log the specific backend validation error to the console
+        console.error("Server Error:", result);
+        throw new Error(result.error || result.message || "Server rejected the request");
+      }
+
+      alert("Complaint submitted successfully!");
+
+      // 3. Reset form states
       setCategory("");
       setHostel("");
       setRoom("");
@@ -45,15 +55,15 @@ function HostelComplaintForm() {
       setDescription("");
       setAdditional("");
       setPhoto(null);
+      
     } catch (error) {
-      console.error(error);
-      alert("Failed to submit complaint.");
+      console.error("DEBUG:", error);
+      alert(`Error: ${error.message}`);
     }
   };
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white flex items-center justify-center px-4 relative overflow-hidden">
-
       {/* Glow background */}
       <div className="absolute w-[500px] h-[500px] bg-red-600/20 blur-[160px] rounded-full -z-10 animate-glow" />
 
@@ -69,13 +79,13 @@ function HostelComplaintForm() {
         <form className="space-y-6" onSubmit={handleSubmit}>
           {/* Category */}
           <div>
-            <label className="block text-sm font-medium mb-2">Complaint Category</label>
+            <label className="block text-sm font-medium mb-2">Complaint Category *</label>
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
               className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl px-4 py-3
                          focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500
-                         focus:scale-105 focus:shadow-lg transition-all duration-300"
+                         focus:scale-105 transition-all duration-300"
             >
               <option value="">Select category</option>
               <option value="Room Issue">Room Issue</option>
@@ -89,7 +99,7 @@ function HostelComplaintForm() {
           {/* Hostel + Room */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium mb-2">Hostel Name</label>
+              <label className="block text-sm font-medium mb-2">Hostel Name *</label>
               <input
                 type="text"
                 placeholder="e.g. Aryabhatta Hostel"
@@ -97,7 +107,7 @@ function HostelComplaintForm() {
                 onChange={(e) => setHostel(e.target.value)}
                 className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl px-4 py-3
                            focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500
-                           focus:scale-105 focus:shadow-lg transition-all duration-300"
+                           focus:scale-105 transition-all duration-300"
               />
             </div>
 
@@ -110,7 +120,7 @@ function HostelComplaintForm() {
                 onChange={(e) => setRoom(e.target.value)}
                 className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl px-4 py-3
                            focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500
-                           focus:scale-105 focus:shadow-lg transition-all duration-300"
+                           focus:scale-105 transition-all duration-300"
               />
             </div>
           </div>
@@ -124,13 +134,13 @@ function HostelComplaintForm() {
               onChange={(e) => setDate(e.target.value)}
               className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl px-4 py-3
                          focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500
-                         focus:scale-105 focus:shadow-lg transition-all duration-300"
+                         focus:scale-105 transition-all duration-300"
             />
           </div>
 
           {/* Description */}
           <div>
-            <label className="block text-sm font-medium mb-2">Describe Your Complaint</label>
+            <label className="block text-sm font-medium mb-2">Describe Your Complaint *</label>
             <textarea
               rows="5"
               placeholder="Write your issue in detail..."
@@ -138,7 +148,7 @@ function HostelComplaintForm() {
               onChange={(e) => setDescription(e.target.value)}
               className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl px-4 py-3
                          focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500
-                         focus:scale-105 focus:shadow-lg transition-all duration-300 resize-none"
+                         focus:scale-105 transition-all duration-300 resize-none"
             ></textarea>
           </div>
 
@@ -152,22 +162,8 @@ function HostelComplaintForm() {
               onChange={(e) => setAdditional(e.target.value)}
               className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl px-4 py-3
                          focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500
-                         focus:scale-105 focus:shadow-lg transition-all duration-300 resize-none"
+                         focus:scale-105 transition-all duration-300 resize-none"
             ></textarea>
-          </div>
-
-          {/* Photo */}
-          <div>
-            <label className="block text-sm font-medium mb-2">Upload Photo (optional)</label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => setPhoto(e.target.files[0])}
-              className="w-full text-gray-200 bg-[#0a0a0a] border border-white/10 rounded-xl px-4 py-3
-                         focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500
-                         focus:scale-105 focus:shadow-lg transition-all duration-300"
-            />
-            {photo && <p className="mt-2 text-sm text-green-400 animate-fadein">Selected: {photo.name}</p>}
           </div>
 
           {/* Submit Button */}
@@ -182,8 +178,8 @@ function HostelComplaintForm() {
         </form>
       </div>
 
-      {/* Tailwind Custom Animations */}
-      <style jsx>{`
+      {/* Corrected Style Tag (Removed 'jsx' attribute to fix console warning) */}
+      <style>{`
         @keyframes slideup-fade {
           0% { opacity: 0; transform: translateY(50px); }
           100% { opacity: 1; transform: translateY(0); }
