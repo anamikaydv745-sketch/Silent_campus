@@ -1,91 +1,162 @@
 import { useState } from "react";
+import axios from "axios";
 
 function MessComplaintForm() {
   const [photo, setPhoto] = useState(null);
 
+  const [formData, setFormData] = useState({
+    category: "Hostel",
+    subCategory: "Mess",
+    complaintType: "",
+    messName: "",
+    mealType: "",
+    incidentDate: "",
+    description: "",
+    additionalDetails: "",
+  });
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const data = new FormData();
+
+      // Append all form fields
+      for (const key in formData) {
+        data.append(key, formData[key]);
+      }
+
+      // Append photo if selected
+      if (photo) {
+        data.append("photo", photo);
+      }
+
+      await axios.post("http://localhost:5000/api/complaints", data, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      alert("Mess complaint submitted successfully ✅");
+
+      // Reset form
+      setFormData({
+        category: "Hostel",
+        subCategory: "Mess",
+        complaintType: "",
+        messName: "",
+        mealType: "",
+        incidentDate: "",
+        description: "",
+        additionalDetails: "",
+      });
+      setPhoto(null);
+    } catch (err) {
+      console.error(err);
+      alert("Error submitting complaint ❌");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white flex items-center justify-center px-4 relative overflow-hidden">
-
-      {/* Animated Glow Background */}
       <div className="absolute w-[500px] h-[500px] bg-green-600/20 blur-[160px] rounded-full -z-10 animate-glow" />
 
-      {/* Form Card with slide-up + fade-in */}
       <div className="w-full max-w-2xl bg-[#111] border border-white/10 rounded-3xl p-10 shadow-xl animate-slideup-fade">
         <h1 className="text-3xl font-black mb-2 text-center animate-pulse-slow">
           Mess Complaint Form
         </h1>
         <p className="text-gray-400 text-center mb-8">
-          Your complaint will remain <span className="text-green-500 animate-pulse">100% anonymous</span>
+          Your complaint will remain{" "}
+          <span className="text-green-500 animate-pulse">100% anonymous</span>
         </p>
 
-        <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
-
-          {/* Complaint Category */}
+        <form className="space-y-6" onSubmit={handleSubmit}>
+          {/* Complaint Type */}
           <div>
-            <label className="block text-sm font-medium mb-2">Complaint Category</label>
-            <select className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl px-4 py-3
-                               focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500
-                               focus:scale-105 focus:shadow-lg
-                               transition-all duration-300">
-              <option>Select category</option>
-              <option>Food Quality</option>
-              <option>Hygiene / Cleanliness</option>
-              <option>Meal Timing</option>
-              <option>Service Staff</option>
-              <option>Other</option>
+            <label className="block text-sm font-medium mb-2">
+              Complaint Type
+            </label>
+            <select
+              name="complaintType"
+              value={formData.complaintType}
+              onChange={handleChange}
+              className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl px-4 py-3
+                         focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500
+                         focus:scale-105 focus:shadow-lg transition-all duration-300"
+            >
+              <option value="">Select type</option>
+              <option value="Food Quality">Food Quality</option>
+              <option value="Hygiene / Cleanliness">Hygiene / Cleanliness</option>
+              <option value="Meal Timing">Meal Timing</option>
+              <option value="Service Staff">Service Staff</option>
+              <option value="Other">Other</option>
             </select>
           </div>
 
-          {/* Mess / Hall Name */}
+          {/* Mess Name */}
           <div>
             <label className="block text-sm font-medium mb-2">Mess / Hall Name</label>
             <input
+              name="messName"
+              value={formData.messName}
+              onChange={handleChange}
               type="text"
               placeholder="e.g. Aryabhatta Mess"
               className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl px-4 py-3
                          focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500
-                         focus:scale-105 focus:shadow-lg
-                         transition-all duration-300"
+                         focus:scale-105 focus:shadow-lg transition-all duration-300"
             />
           </div>
 
           {/* Meal Type */}
           <div>
             <label className="block text-sm font-medium mb-2">Meal Type</label>
-            <select className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl px-4 py-3
-                               focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500
-                               focus:scale-105 focus:shadow-lg
-                               transition-all duration-300">
-              <option>Select meal</option>
-              <option>Breakfast</option>
-              <option>Lunch</option>
-              <option>Dinner</option>
-              <option>Snacks / Other</option>
+            <select
+              name="mealType"
+              value={formData.mealType}
+              onChange={handleChange}
+              className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl px-4 py-3
+                         focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500
+                         focus:scale-105 focus:shadow-lg transition-all duration-300"
+            >
+              <option value="">Select meal</option>
+              <option value="Breakfast">Breakfast</option>
+              <option value="Lunch">Lunch</option>
+              <option value="Dinner">Dinner</option>
+              <option value="Snacks / Other">Snacks / Other</option>
             </select>
           </div>
 
-          {/* Date of Incident */}
+          {/* Incident Date */}
           <div>
             <label className="block text-sm font-medium mb-2">Date of Incident</label>
             <input
+              name="incidentDate"
+              value={formData.incidentDate}
+              onChange={handleChange}
               type="date"
               className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl px-4 py-3
                          focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500
-                         focus:scale-105 focus:shadow-lg
-                         transition-all duration-300"
+                         focus:scale-105 focus:shadow-lg transition-all duration-300"
             />
           </div>
 
-          {/* Complaint Description */}
+          {/* Description */}
           <div>
             <label className="block text-sm font-medium mb-2">Describe Your Complaint</label>
             <textarea
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
               rows="5"
               placeholder="Write your issue in detail..."
               className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl px-4 py-3
                          focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500
-                         focus:scale-105 focus:shadow-lg
-                         transition-all duration-300 resize-none"
+                         focus:scale-105 focus:shadow-lg transition-all duration-300 resize-none"
             ></textarea>
           </div>
 
@@ -93,12 +164,14 @@ function MessComplaintForm() {
           <div>
             <label className="block text-sm font-medium mb-2">Additional Details (optional)</label>
             <textarea
+              name="additionalDetails"
+              value={formData.additionalDetails}
+              onChange={handleChange}
               rows="3"
               placeholder="Any other info you want to add..."
               className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl px-4 py-3
                          focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500
-                         focus:scale-105 focus:shadow-lg
-                         transition-all duration-300 resize-none"
+                         focus:scale-105 focus:shadow-lg transition-all duration-300 resize-none"
             ></textarea>
           </div>
 
@@ -111,13 +184,11 @@ function MessComplaintForm() {
               onChange={(e) => setPhoto(e.target.files[0])}
               className="w-full text-gray-200 bg-[#0a0a0a] border border-white/10 rounded-xl px-4 py-3
                          focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500
-                         focus:scale-105 focus:shadow-lg
-                         transition-all duration-300"
+                         focus:scale-105 focus:shadow-lg transition-all duration-300"
             />
             {photo && <p className="mt-2 text-sm text-green-400 animate-fadein">Selected: {photo.name}</p>}
           </div>
 
-          {/* Submit Button */}
           <button
             type="submit"
             className="w-full bg-green-600 hover:bg-green-700 transition-all
@@ -126,45 +197,8 @@ function MessComplaintForm() {
           >
             Take Action
           </button>
-
         </form>
       </div>
-
-      {/* Tailwind Custom Animations */}
-      <style jsx>{`
-        @keyframes slideup-fade {
-          0% { opacity: 0; transform: translateY(50px); }
-          100% { opacity: 1; transform: translateY(0); }
-        }
-        .animate-slideup-fade {
-          animation: slideup-fade 0.8s ease forwards;
-        }
-
-        @keyframes glow {
-          0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.4; }
-          50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.6; }
-        }
-        .animate-glow {
-          animation: glow 6s ease-in-out infinite;
-        }
-
-        @keyframes fadein {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-        .animate-fadein {
-          animation: fadein 0.5s ease forwards;
-        }
-
-        @keyframes pulse-slow {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.6; }
-        }
-        .animate-pulse-slow {
-          animation: pulse-slow 2s infinite;
-        }
-      `}</style>
-
     </div>
   );
 }

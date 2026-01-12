@@ -5,15 +5,16 @@ const router = express.Router();
 
 router.post("/", async (req, res) => {
   try {
-    console.log("DATA RECEIVED:", req.body);
-
     const complaint = new Complaint(req.body);
     await complaint.save();
 
-    res.status(201).json({ message: "Complaint saved" });
+    res.status(201).json({
+      message: "Complaint submitted successfully",
+    });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error" });
+    res.status(500).json({
+      error: error.message,
+    });
   }
 });
 

@@ -1,77 +1,137 @@
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import axios from "axios";
 
-function TrackReports() {
-  const navigate = useNavigate();
+function TrackComplaints() {
+  const [complaints, setComplaints] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Dummy data (later comes from backend)
-  const reports = [
-    {
-      id: "CMP1023",
-      category: "Water Issue",
-      hostel: "Aryabhatta Hostel",
-      status: "In Progress",
-      date: "2026-01-08",
-    },
-    {
-      id: "CMP1024",
-      category: "Cleanliness",
-      hostel: "Raman Hostel",
-      status: "Resolved",
-      date: "2026-01-05",
-    },
-  ];
+  useEffect(() => {
+    axios
+      .get("http://localhost:5000/api/complaints") // backend URL
+      .then((res) => {
+        setComplaints(res.data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Error fetching complaints:", err);
+        setLoading(false);
+      });
+  }, []);
 
-  return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white p-6">
-      
-      {/* Header */}
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-black">My Reports</h1>
-        <button
-          onClick={() => navigate("/")}
-          className="text-sm text-gray-400 hover:text-white transition"
-        >
-          ← Back to Form
-        </button>
-      </div>
+  if (loading) return <p>Loading complaints...</p>;
 
-      {/* Reports List */}
-      <div className="space-y-6 max-w-3xl mx-auto">
-        {reports.map((report) => (
-          <div
-            key={report.id}
-            className="bg-[#111] border border-white/10 rounded-2xl p-6
-                       hover:border-red-500 transition-all"
-          >
-            <div className="flex justify-between mb-2">
-              <span className="font-semibold text-red-400">
-                #{report.id}
-              </span>
-              <span
-                className={`text-sm ${
-                  report.status === "Resolved"
-                    ? "text-green-400"
-                    : "text-yellow-400"
-                }`}
-              >
-                {report.status}
-              </span>
-            </div>
+  // Separate complaints by category
+  const hostelComplaints = complaints.filter((c) => c.category === "Hostel");
+  const messComplaints = complaints.filter((c) => c.category === "Mess");
+  const campusComplaints = complaints.filter((c) => c.category === "Campus");
 
-            <p className="text-gray-300">
-              <span className="font-medium">Category:</span> {report.category}
-            </p>
-            <p className="text-gray-300">
-              <span className="font-medium">Hostel:</span> {report.hostel}
-            </p>
-            <p className="text-gray-500 text-sm mt-2">
-              Submitted on {report.date}
-            </p>
+  // Status color mapping
+  const statusColor = {
+    pending: "#f44336",      // red
+    "in-progress": "#ff9800", // orange
+    resolved: "#4caf50",      // green
+  };
+
+  // Progress steps
+  const statusSteps = ["pending", "in-progress", "resolved"];
+
+  // Render one complaint card
+  const ComplaintCard = ({ complaint }) => (
+    <div
+      style={{
+        border: "1px solid #ccc",
+        borderRadius: "8px",
+        padding: "16px",
+        marginBottom: "16px",
+        boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+        background: "#fff",
+      }}
+    >
+      <h3 style={{ margin: 0, marginBottom: "8px" }}>{complaint.complaintType || complaint.subCategory}</h3>
+      <p style={{ margin: "4px 0" }}><strong>Description:</strong> {complaint.description}</p>
+      {complaint.messName && <p style={{ margin: "4px 0" }}><strong>Mess:</strong> {complaint.messName}</p>}
+      {complaint.mealType && <p style={{ margin: "4px 0" }}><strong>Meal:</strong> {complaint.mealType}</p>}
+      <p style={{ margin: "4px 0" }}><strong>Submitted:</strong> {new Date(complaint.createdAt).toLocaleString()}</p>
+
+      {/* Progress tracker */}
+      <div style={{ display: "flex", justifyContent: "space-between", marginTop: "12px" }}>
+        {statusSteps.map((step, index) => (
+          <div key={index} style={{ textAlign: "center", flex: 1, position: "relative" }}>
+            <div
+              style={{
+                width: "24px",
+                height: "24px",
+                borderRadius: "50%",
+                margin: "0 auto",
+                background:
+                  statusSteps.indexOf(complaint.status) >= index
+                    ? statusColor[step]
+                    : "#ddd",
+              }}
+            ></div>
+            <span style={{ fontSize: "12px", color: "#555", marginTop: "4px", display: "block" }}>{step}</span>
+
+            {index < statusSteps.length - 1 && (
+              <div
+                style={{
+                  position: "absolute",
+                  top: "12px",
+                  left: "50%",
+                  height: "4px",
+                  width: "100%",
+                  background:
+                    statusSteps.indexOf(complaint.status) > index
+                      ? statusColor[step]
+                      : "#ddd",
+                  zIndex: -1,
+                }}
+              ></div>
+            )}
           </div>
         ))}
       </div>
     </div>
   );
+
+  return (
+    <div style={{ padding: "20px", fontFamily: "Arial, sans-serif", background: "#f5f5f5" }}>
+      <h1 style={{ marginBottom: "24px" }}>Track Your Complaints</h1>
+
+      {/* Hostel */}
+      {hostelComplaints.length > 0 && (
+        <div style={{ marginBottom: "32px" }}>
+          <h2 style={{ borderBottom: "2px solid #2196f3", paddingBottom: "4px", color: "#2196f3" }}>Hostel Complaints</h2>
+          {hostelComplaints.map((c) => (
+            <ComplaintCard key={c._id} complaint={c} />
+          ))}
+        </div>
+      )}
+
+      {/* Mess */}
+      {messComplaints.length > 0 && (
+        <div style={{ marginBottom: "32px" }}>
+          <h2 style={{ borderBottom: "2px solid #ff9800", paddingBottom: "4px", color: "#ff9800" }}>Mess Complaints</h2>
+          {messComplaints.map((c) => (
+            <ComplaintCard key={c._id} complaint={c} />
+          ))}
+        </div>
+      )}
+
+      {/* Campus */}
+      {campusComplaints.length > 0 && (
+        <div style={{ marginBottom: "32px" }}>
+          <h2 style={{ borderBottom: "2px solid #4caf50", paddingBottom: "4px", color: "#4caf50" }}>Campus Complaints</h2>
+          {campusComplaints.map((c) => (
+            <ComplaintCard key={c._id} complaint={c} />
+          ))}
+        </div>
+      )}
+
+      {hostelComplaints.length + messComplaints.length + campusComplaints.length === 0 && (
+        <p>No complaints submitted yet.</p>
+      )}
+    </div>
+  );
 }
 
-export default TrackReports;
+export default TrackComplaints;
