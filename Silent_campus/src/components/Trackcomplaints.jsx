@@ -1,137 +1,109 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 
-function TrackComplaints() {
+export default function TrackComplaints() {
   const [complaints, setComplaints] = useState([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     axios
-      .get("http://localhost:5000/api/complaints") // backend URL
-      .then((res) => {
-        setComplaints(res.data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Error fetching complaints:", err);
-        setLoading(false);
-      });
+      .get("http://localhost:5000/api/complaints")
+      .then(res => setComplaints(res.data))
+      .catch(err => console.error(err));
   }, []);
 
-  if (loading) return <p>Loading complaints...</p>;
+  const hostel = complaints.filter(c => c.category === "Hostel");
+  const mess = complaints.filter(c => c.category === "Mess");
+  const campus = complaints.filter(c => c.category === "Campus");
 
-  // Separate complaints by category
-  const hostelComplaints = complaints.filter((c) => c.category === "Hostel");
-  const messComplaints = complaints.filter((c) => c.category === "Mess");
-  const campusComplaints = complaints.filter((c) => c.category === "Campus");
+  return (
+    <div className="min-h-screen bg-black text-white px-6 md:px-20 py-12">
+      <h1 className="text-4xl font-bold mb-10 bg-gradient-to-r from-red-600 to-orange-500 bg-clip-text text-transparent">
+        Track Your Complaints
+      </h1>
 
-  // Status color mapping
-  const statusColor = {
-    pending: "#f44336",      // red
-    "in-progress": "#ff9800", // orange
-    resolved: "#4caf50",      // green
-  };
+      <Section title="Hostel Complaints" data={hostel} />
+      <Section title="Mess Complaints" data={mess} />
+      <Section title="Campus Complaints" data={campus} />
+    </div>
+  );
+}
 
-  // Progress steps
-  const statusSteps = ["pending", "in-progress", "resolved"];
+/* ---------------- SECTION ---------------- */
 
-  // Render one complaint card
-  const ComplaintCard = ({ complaint }) => (
-    <div
-      style={{
-        border: "1px solid #ccc",
-        borderRadius: "8px",
-        padding: "16px",
-        marginBottom: "16px",
-        boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-        background: "#fff",
-      }}
-    >
-      <h3 style={{ margin: 0, marginBottom: "8px" }}>{complaint.complaintType || complaint.subCategory}</h3>
-      <p style={{ margin: "4px 0" }}><strong>Description:</strong> {complaint.description}</p>
-      {complaint.messName && <p style={{ margin: "4px 0" }}><strong>Mess:</strong> {complaint.messName}</p>}
-      {complaint.mealType && <p style={{ margin: "4px 0" }}><strong>Meal:</strong> {complaint.mealType}</p>}
-      <p style={{ margin: "4px 0" }}><strong>Submitted:</strong> {new Date(complaint.createdAt).toLocaleString()}</p>
+function Section({ title, data }) {
+  if (data.length === 0) return null;
 
-      {/* Progress tracker */}
-      <div style={{ display: "flex", justifyContent: "space-between", marginTop: "12px" }}>
-        {statusSteps.map((step, index) => (
-          <div key={index} style={{ textAlign: "center", flex: 1, position: "relative" }}>
-            <div
-              style={{
-                width: "24px",
-                height: "24px",
-                borderRadius: "50%",
-                margin: "0 auto",
-                background:
-                  statusSteps.indexOf(complaint.status) >= index
-                    ? statusColor[step]
-                    : "#ddd",
-              }}
-            ></div>
-            <span style={{ fontSize: "12px", color: "#555", marginTop: "4px", display: "block" }}>{step}</span>
+  return (
+    <div className="mb-14">
+      <h2 className="text-2xl font-semibold mb-6 border-l-4 border-orange-500 pl-4">
+        {title}
+      </h2>
 
-            {index < statusSteps.length - 1 && (
+      <div className="space-y-5">
+        {data.map(item => (
+          <ComplaintCard key={item._id} item={item} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ---------------- CARD ---------------- */
+
+function ComplaintCard({ item }) {
+  const steps = ["pending", "in-progress", "resolved"];
+  const activeIndex = steps.indexOf(item.status);
+
+  return (
+    <div className="bg-zinc-900 rounded-xl p-6 shadow-xl border border-zinc-800">
+      <div className="flex justify-between text-sm mb-3">
+        <span className="text-orange-400 font-medium">
+          #{item.complaintId}
+        </span>
+        <span className="text-zinc-400">
+          {new Date(item.createdAt).toLocaleDateString()}
+        </span>
+      </div>
+
+      <p className="text-zinc-200 mb-6 leading-relaxed">
+        {item.description}
+      </p>
+
+      {/* AMAZON STYLE TRACKER */}
+      <div className="flex items-center justify-between relative">
+        {steps.map((step, i) => (
+          <div key={i} className="flex-1 flex flex-col items-center relative">
+            {/* LINE */}
+            {i !== 0 && (
               <div
-                style={{
-                  position: "absolute",
-                  top: "12px",
-                  left: "50%",
-                  height: "4px",
-                  width: "100%",
-                  background:
-                    statusSteps.indexOf(complaint.status) > index
-                      ? statusColor[step]
-                      : "#ddd",
-                  zIndex: -1,
-                }}
-              ></div>
+                className={`absolute top-3 left-[-50%] h-1 w-full ${
+                  i <= activeIndex
+                    ? "bg-gradient-to-r from-red-600 to-orange-500"
+                    : "bg-zinc-700"
+                }`}
+              />
             )}
+
+            {/* DOT */}
+            <div
+              className={`w-6 h-6 rounded-full z-10 ${
+                i <= activeIndex
+                  ? "bg-gradient-to-br from-red-600 to-orange-500"
+                  : "bg-zinc-700"
+              }`}
+            />
+
+            {/* LABEL */}
+            <span
+              className={`mt-2 text-xs capitalize ${
+                i <= activeIndex ? "text-white" : "text-zinc-500"
+              }`}
+            >
+              {step.replace("-", " ")}
+            </span>
           </div>
         ))}
       </div>
     </div>
   );
-
-  return (
-    <div style={{ padding: "20px", fontFamily: "Arial, sans-serif", background: "#f5f5f5" }}>
-      <h1 style={{ marginBottom: "24px" }}>Track Your Complaints</h1>
-
-      {/* Hostel */}
-      {hostelComplaints.length > 0 && (
-        <div style={{ marginBottom: "32px" }}>
-          <h2 style={{ borderBottom: "2px solid #2196f3", paddingBottom: "4px", color: "#2196f3" }}>Hostel Complaints</h2>
-          {hostelComplaints.map((c) => (
-            <ComplaintCard key={c._id} complaint={c} />
-          ))}
-        </div>
-      )}
-
-      {/* Mess */}
-      {messComplaints.length > 0 && (
-        <div style={{ marginBottom: "32px" }}>
-          <h2 style={{ borderBottom: "2px solid #ff9800", paddingBottom: "4px", color: "#ff9800" }}>Mess Complaints</h2>
-          {messComplaints.map((c) => (
-            <ComplaintCard key={c._id} complaint={c} />
-          ))}
-        </div>
-      )}
-
-      {/* Campus */}
-      {campusComplaints.length > 0 && (
-        <div style={{ marginBottom: "32px" }}>
-          <h2 style={{ borderBottom: "2px solid #4caf50", paddingBottom: "4px", color: "#4caf50" }}>Campus Complaints</h2>
-          {campusComplaints.map((c) => (
-            <ComplaintCard key={c._id} complaint={c} />
-          ))}
-        </div>
-      )}
-
-      {hostelComplaints.length + messComplaints.length + campusComplaints.length === 0 && (
-        <p>No complaints submitted yet.</p>
-      )}
-    </div>
-  );
 }
-
-export default TrackComplaints;
