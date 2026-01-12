@@ -3,22 +3,26 @@ import mongoose from "mongoose";
 const complaintSchema = new mongoose.Schema(
   {
     category: {
-      type: String, // Hostel / Campus / Mess
+      type: String, // Hostel / Mess / Campus
       required: true,
     },
     subCategory: {
-      type: String, // Mess / Library / Washroom / Room
+      type: String, // Room Issue / Infrastructure / Mess etc
       required: true,
     },
-    complaintType: String,
-    messName: String,
-    mealType: String,
-    incidentDate: String,
     description: {
       type: String,
       required: true,
     },
     additionalDetails: String,
+
+    // optional fields (used by different forms)
+    hostel: String,
+    room: String,
+    buildingName: String,
+    roomNumber: String,
+    incidentDate: String,
+
     status: {
       type: String,
       enum: ["pending", "in-progress", "resolved"],

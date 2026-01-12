@@ -7,13 +7,22 @@ export default function TrackComplaints() {
   useEffect(() => {
     axios
       .get("http://localhost:5000/api/complaints")
-      .then(res => setComplaints(res.data))
-      .catch(err => console.error(err));
+      .then((res) => setComplaints(res.data))
+      .catch((err) => console.error(err));
   }, []);
 
-  const hostel = complaints.filter(c => c.category === "Hostel");
-  const mess = complaints.filter(c => c.category === "Mess");
-  const campus = complaints.filter(c => c.category === "Campus");
+  // ✅ CORRECT FILTERING
+  const hostel = complaints.filter(
+    (c) => c.category === "Hostel" && c.subCategory !== "Mess"
+  );
+
+  const mess = complaints.filter(
+    (c) => c.category === "Hostel" && c.subCategory === "Mess"
+  );
+
+  const campus = complaints.filter(
+    (c) => c.category === "Campus"
+  );
 
   return (
     <div className="min-h-screen bg-black text-white px-6 md:px-20 py-12">
@@ -40,7 +49,7 @@ function Section({ title, data }) {
       </h2>
 
       <div className="space-y-5">
-        {data.map(item => (
+        {data.map((item) => (
           <ComplaintCard key={item._id} item={item} />
         ))}
       </div>
@@ -73,7 +82,6 @@ function ComplaintCard({ item }) {
       <div className="flex items-center justify-between relative">
         {steps.map((step, i) => (
           <div key={i} className="flex-1 flex flex-col items-center relative">
-            {/* LINE */}
             {i !== 0 && (
               <div
                 className={`absolute top-3 left-[-50%] h-1 w-full ${
@@ -84,7 +92,6 @@ function ComplaintCard({ item }) {
               />
             )}
 
-            {/* DOT */}
             <div
               className={`w-6 h-6 rounded-full z-10 ${
                 i <= activeIndex
@@ -93,7 +100,6 @@ function ComplaintCard({ item }) {
               }`}
             />
 
-            {/* LABEL */}
             <span
               className={`mt-2 text-xs capitalize ${
                 i <= activeIndex ? "text-white" : "text-zinc-500"

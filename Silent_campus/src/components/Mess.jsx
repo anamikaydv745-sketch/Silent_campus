@@ -2,7 +2,7 @@ import { useState } from "react";
 import axios from "axios";
 
 function MessComplaintForm() {
-  const [photo, setPhoto] = useState(null);
+  const [photo, setPhoto] = useState(null); // UI ke liye only
 
   const [formData, setFormData] = useState({
     category: "Hostel",
@@ -22,28 +22,36 @@ function MessComplaintForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // basic validation
+    if (!formData.complaintType || !formData.description) {
+      alert("Please select complaint type and write description");
+      return;
+    }
+
     try {
-      const data = new FormData();
-
-      // Append all form fields
-      for (const key in formData) {
-        data.append(key, formData[key]);
-      }
-
-      // Append photo if selected
-      if (photo) {
-        data.append("photo", photo);
-      }
-
-      await axios.post("http://localhost:5000/api/complaints", data, {
-        headers: {
-          "Content-Type": "multipart/form-data",
+      // ✅ ONLY JSON (backend compatible)
+      await axios.post(
+        "http://localhost:5000/api/complaints",
+        {
+          category: formData.category,
+          subCategory: formData.subCategory,
+          complaintType: formData.complaintType,
+          messName: formData.messName,
+          mealType: formData.mealType,
+          incidentDate: formData.incidentDate,
+          description: formData.description,
+          additionalDetails: formData.additionalDetails,
         },
-      });
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       alert("Mess complaint submitted successfully ✅");
 
-      // Reset form
+      // reset form
       setFormData({
         category: "Hostel",
         subCategory: "Mess",
@@ -54,9 +62,10 @@ function MessComplaintForm() {
         description: "",
         additionalDetails: "",
       });
+
       setPhoto(null);
     } catch (err) {
-      console.error(err);
+      console.error("SUBMIT ERROR 👉", err.response?.data || err.message);
       alert("Error submitting complaint ❌");
     }
   };
@@ -99,7 +108,9 @@ function MessComplaintForm() {
 
           {/* Mess Name */}
           <div>
-            <label className="block text-sm font-medium mb-2">Mess / Hall Name</label>
+            <label className="block text-sm font-medium mb-2">
+              Mess / Hall Name
+            </label>
             <input
               name="messName"
               value={formData.messName}
@@ -133,7 +144,9 @@ function MessComplaintForm() {
 
           {/* Incident Date */}
           <div>
-            <label className="block text-sm font-medium mb-2">Date of Incident</label>
+            <label className="block text-sm font-medium mb-2">
+              Date of Incident
+            </label>
             <input
               name="incidentDate"
               value={formData.incidentDate}
@@ -147,7 +160,9 @@ function MessComplaintForm() {
 
           {/* Description */}
           <div>
-            <label className="block text-sm font-medium mb-2">Describe Your Complaint</label>
+            <label className="block text-sm font-medium mb-2">
+              Describe Your Complaint
+            </label>
             <textarea
               name="description"
               value={formData.description}
@@ -157,12 +172,14 @@ function MessComplaintForm() {
               className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl px-4 py-3
                          focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500
                          focus:scale-105 focus:shadow-lg transition-all duration-300 resize-none"
-            ></textarea>
+            />
           </div>
 
           {/* Additional Details */}
           <div>
-            <label className="block text-sm font-medium mb-2">Additional Details (optional)</label>
+            <label className="block text-sm font-medium mb-2">
+              Additional Details (optional)
+            </label>
             <textarea
               name="additionalDetails"
               value={formData.additionalDetails}
@@ -172,12 +189,14 @@ function MessComplaintForm() {
               className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl px-4 py-3
                          focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500
                          focus:scale-105 focus:shadow-lg transition-all duration-300 resize-none"
-            ></textarea>
+            />
           </div>
 
-          {/* Photo Upload */}
+          {/* Photo Upload (UI SAME, backend ignore karega) */}
           <div>
-            <label className="block text-sm font-medium mb-2">Upload Photo (optional)</label>
+            <label className="block text-sm font-medium mb-2">
+              Upload Photo (optional)
+            </label>
             <input
               type="file"
               accept="image/*"
@@ -186,7 +205,11 @@ function MessComplaintForm() {
                          focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-500
                          focus:scale-105 focus:shadow-lg transition-all duration-300"
             />
-            {photo && <p className="mt-2 text-sm text-green-400 animate-fadein">Selected: {photo.name}</p>}
+            {photo && (
+              <p className="mt-2 text-sm text-green-400 animate-fadein">
+                Selected: {photo.name}
+              </p>
+            )}
           </div>
 
           <button

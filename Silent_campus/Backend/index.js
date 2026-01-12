@@ -8,56 +8,28 @@ dotenv.config();
 
 const app = express();
 
-// ✅ Middleware
 app.use(cors());
-app.use(express.json());
+app.use(express.json()); // ✅ ONLY JSON
 
-// ✅ Test route
-app.get("/", (req, res) => {
-  res.send("Backend running 🚀");
-});
-
-// ✅ POST complaint
 app.post("/api/complaints", async (req, res) => {
   try {
-    console.log("BODY:", req.body);
-
-    const newComplaint = new Complaint({
-      complaintId: "CMP" + Date.now(),
-      ...req.body
-    });
-
-    await newComplaint.save();
-    res.status(201).json(newComplaint);
+    const complaint = new Complaint(req.body);
+    await complaint.save();
+    res.status(201).json({ message: "Complaint saved", complaint });
   } catch (err) {
-    console.error("REAL ERROR 👉", err);
+    console.error(err);
     res.status(400).json({ error: err.message });
   }
 });
 
-// app.post("/api/test", (req, res) => {
-//   console.log("TEST BODY 👉", req.body);
-//   res.status(200).json({ message: "Test route works!", data: req.body });
-// });
-
-
-// ✅ GET complaints
 app.get("/api/complaints", async (req, res) => {
-  try {
-    const complaints = await Complaint.find().sort({ createdAt: -1 });
-    res.json(complaints);
-  } catch (err) {
-    res.status(500).json({ error: "Failed to fetch complaints" });
-  }
+  const complaints = await Complaint.find().sort({ createdAt: -1 });
+  res.json(complaints);
 });
 
-// ✅ MongoDB connection
 mongoose
   .connect(process.env.MONGO_URI)
-  .then(() => console.log("MongoDB Connected ✅"))
-  .catch(err => console.error(err));
+  .then(() => console.log("MongoDB connected ✅"))
+  .catch(console.error);
 
-// ✅ Start server
-app.listen(5000, () => {
-  console.log("Server running on port 5000 🔥");
-});
+app.listen(5000, () => console.log("Server running on 5000 🚀"));
