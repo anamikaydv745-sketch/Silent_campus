@@ -1,44 +1,49 @@
 import express from "express";
-import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
 import Complaint from "./models/Complaint.js";
+import connectDB from "./db.js";
 
 dotenv.config();
 
 const app = express();
 
+// ✅ CORS
 app.use(
   cors({
     origin: "https://silent-campus.vercel.app",
     methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true
+    credentials: true,
   })
 );
 
-app.use(express.json()); // JSON only
+app.use(express.json());
 
+// ✅ Connect DB BEFORE routes
+await connectDB();
+
+// ✅ Routes
 app.post("/api/complaints", async (req, res) => {
   try {
-    const complaint = new Complaint(req.body);
-    await complaint.save();
+    const complaint = await Complaint.create(req.body);
     res.status(201).json({ message: "Complaint saved", complaint });
   } catch (err) {
-    console.error(err);
+    console.error("Save error:", err);
     res.status(400).json({ error: err.message });
   }
 });
 
 app.get("/api/complaints", async (req, res) => {
-  const complaints = await Complaint.find().sort({ createdAt: -1 });
-  res.json(complaints);
+  try {
+    const complaints = await Complaint.find().sort({ createdAt: -1 });
+    res.json(complaints);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
-mongoose
-  .connect(process.env.MONGO_URI)
-  .then(() => console.log("MongoDB connected ✅"))
-  .catch(console.error);
-
-app.listen(5000, "0.0.0.0", () => {
-  console.log("Server running on port 5000");
+// ✅ Render port fix
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log("Server running on port", PORT);
 });
