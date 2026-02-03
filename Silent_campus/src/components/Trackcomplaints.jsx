@@ -6,7 +6,7 @@ export default function TrackComplaints() {
 
   useEffect(() => {
     axios
-      .get("http://localhost:5000/api/complaints")
+      .get("https://silent-campus.onrender.com/api/complaints")
       .then((res) => setComplaints(res.data))
       .catch((err) => console.error(err));
   }, []);

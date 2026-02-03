@@ -33,7 +33,7 @@ function CampusComplaintForm() {
     try {
       // ✅ ONLY JSON (backend supports this)
       await axios.post(
-        "http://localhost:5000/api/complaints",
+        "https://silent-campus.onrender.com/api/complaints",
         {
           category: formData.category,
           subCategory: formData.subCategory,
