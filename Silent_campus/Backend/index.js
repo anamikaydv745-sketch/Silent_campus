@@ -8,7 +8,16 @@ dotenv.config();
 
 const app = express();
 
-app.use(cors());
+const cors = require("cors");
+
+app.use(
+  cors({
+    origin: "https://silent-campus.vercel.app",
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true
+  })
+);
+
 app.use(express.json()); // ✅ ONLY JSON
 
 app.post("/api/complaints", async (req, res) => {
