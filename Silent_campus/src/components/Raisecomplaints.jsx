@@ -8,7 +8,7 @@ function RaiseComplaint() {
 
       {/* Background glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 
-                      w-[500px] h-[500px] bg-red-600/10 blur-[150px] rounded-full -z-10" />
+                      w-125h-125 bg-red-600/10 blur-[150px] rounded-full -z-10" />
 
       {/* Top branding */}
       <div className="flex items-center justify-center gap-2 pt-20 mb-14">

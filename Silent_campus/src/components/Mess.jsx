@@ -72,7 +72,7 @@ function MessComplaintForm() {
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white flex items-center justify-center px-4 relative overflow-hidden">
-      <div className="absolute w-[500px] h-[500px] bg-green-600/20 blur-[160px] rounded-full -z-10 animate-glow" />
+      <div className="absolute w-125 h-125 bg-green-600/20 blur-[160px] rounded-full -z-10 animate-glow" />
 
       <div className="w-full max-w-2xl bg-[#111] border border-white/10 rounded-3xl p-10 shadow-xl animate-slideup-fade">
         <h1 className="text-3xl font-black mb-2 text-center animate-pulse-slow">

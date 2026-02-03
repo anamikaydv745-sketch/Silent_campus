@@ -26,7 +26,7 @@ export default function TrackComplaints() {
 
   return (
     <div className="min-h-screen bg-black text-white px-6 md:px-20 py-12">
-      <h1 className="text-4xl font-bold mb-10 bg-gradient-to-r from-red-600 to-orange-500 bg-clip-text text-transparent">
+      <h1 className="text-4xl font-bold mb-10 bg-linear-to-r from-red-600 to-orange-500 bg-clip-text text-transparent">
         Track Your Complaints
       </h1>
 
@@ -86,7 +86,7 @@ function ComplaintCard({ item }) {
               <div
                 className={`absolute top-3 left-[-50%] h-1 w-full ${
                   i <= activeIndex
-                    ? "bg-gradient-to-r from-red-600 to-orange-500"
+                    ? "bg-linear-to-r from-red-600 to-orange-500"
                     : "bg-zinc-700"
                 }`}
               />
@@ -95,7 +95,7 @@ function ComplaintCard({ item }) {
             <div
               className={`w-6 h-6 rounded-full z-10 ${
                 i <= activeIndex
-                  ? "bg-gradient-to-br from-red-600 to-orange-500"
+                  ? "bg-linear-to-br from-red-600 to-orange-500"
                   : "bg-zinc-700"
               }`}
             />
