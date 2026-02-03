@@ -8,8 +8,6 @@ dotenv.config();
 
 const app = express();
 
-const cors = require("cors");
-
 app.use(
   cors({
     origin: "https://silent-campus.vercel.app",
@@ -18,7 +16,7 @@ app.use(
   })
 );
 
-app.use(express.json()); // ✅ ONLY JSON
+app.use(express.json()); // JSON only
 
 app.post("/api/complaints", async (req, res) => {
   try {
@@ -44,4 +42,3 @@ mongoose
 app.listen(5000, "0.0.0.0", () => {
   console.log("Server running on port 5000");
 });
-
